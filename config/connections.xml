@@ -1,0 +1,22 @@
+<connections>
+	<clients>
+		<client>
+			<name>A</name>
+			<ip>127.0.0.1</ip>
+			<port>50000</port>
+			<index>0</index>
+		</client>
+		<client>
+			<name>B</name>
+			<ip>127.0.0.1</ip>
+			<port>50001</port>
+			<index>1</index>
+		</client>
+		<client>
+			<name>C</name>
+			<ip>127.0.0.1</ip>
+			<port>50002</port>
+			<index>2</index>
+		</client>
+	</clients>	
+</connections>
