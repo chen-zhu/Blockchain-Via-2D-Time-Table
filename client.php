@@ -103,7 +103,7 @@ echo "Ex. A 10 --> send $10 to the client A" . PHP_EOL;
 echo "Ex. A -m I Just Sent You Money --> send the message 'I Just Send You Money' to the client A" . PHP_EOL . PHP_EOL;
 
 
-echo "Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
+echo ">>>Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
 
 $stdin = fopen('php://stdin', 'r');
 $result = stream_set_blocking($stdin, false);
@@ -147,7 +147,7 @@ while(1) {
 
     		$json_string = json_encode($send_body);
     		socket_write($connections[$send_to], $json_string, strlen($json_string));
-
+    		echo PHP_EOL . "[MESSAGE SENT TO $send_to]\n>>>Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
     	} else {	
     		$amount = $x[1];
 
@@ -166,6 +166,7 @@ while(1) {
 			echo "Local Time Table: " . PHP_EOL; 
 			helper::pretty_print_table($table);
 			echo PHP_EOL;
+			echo PHP_EOL . "[TRX SUCCESSED]. \n>>>Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
 			//print_r($local_chain);
     	}
     } else {
@@ -191,7 +192,13 @@ while(1) {
     			//4. insert partial blockchian.
     			if($body['partial_block_chain']){
     				foreach ($body['partial_block_chain'] as $log) {
-    					$local_chain[] = $log;
+    					//check duplicate just in case. Some speical case that will cause client to push over duplicates.
+    					$log_time = $log['original_time']; 
+    					//only insert then the time is larger than time table!
+    					//echo ""; 
+    					if($table[$local_2d_index][$log['original_client_2d_index']] < $log_time){
+							$local_chain[] = $log;    						
+    					}
     				}
     			}
 
@@ -199,6 +206,9 @@ while(1) {
 
     			print_r($local_chain);
     			//helper::pretty_print_table($table);
+
+
+    			echo PHP_EOL . ">>>Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
 	    	}
     	}
     }

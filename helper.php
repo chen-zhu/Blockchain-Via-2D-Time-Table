@@ -45,7 +45,6 @@ class helper {
 				//ignore the receiver's record.
 				continue;
 			}
-
 			if($local_row[$index] > $time){
 				$filter[$index] = array(
 					"max" => $local_row[$index], 
@@ -53,8 +52,6 @@ class helper {
 				);
 			}
 		}
-
-		//print_r($filter);
 
 		//then search block chain based on the calculated filter~
 		$ret = array();
@@ -77,7 +74,6 @@ class helper {
 		//		$local_table[$from_client_index][$idx] = $time;
 		//	}
 		//}
-
 		$clone = $local_table;
 
 		foreach($received_table as $row_num => $row){
@@ -96,6 +92,7 @@ class helper {
 
 		if($print){
 			echo PHP_EOL; 
+			echo "     OLD                   NEW      " . PHP_EOL;
 			echo "__|_A_|_B_|_C_        __|_A_|_B_|_C_ " . PHP_EOL; 
 			echo "A | {$clone[0][0]} | {$clone[0][1]} | {$clone[0][2]}         A | {$local_table[0][0]} | {$local_table[0][1]} | {$local_table[0][2]}" . PHP_EOL;
 			echo "--+---+---+---        --+---+---+---" . PHP_EOL;
