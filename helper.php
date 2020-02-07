@@ -113,6 +113,22 @@ class helper {
 		echo "--------------" . PHP_EOL;
 	}
 
+	public static function check_balance($blockchain){
+		$A = helper::read_balance($blockchain, "A");
+		$B = helper::read_balance($blockchain, "B");
+		$C = helper::read_balance($blockchain, "C");
+
+		echo PHP_EOL;
+		echo " ----Balance--- " . PHP_EOL;
+		echo "| A:   \$$A      " . PHP_EOL;
+		echo "| B:   \$$B      " . PHP_EOL;
+		echo "| C:   \$$C      " . PHP_EOL;
+		echo " -------------- " . PHP_EOL;
+
+
+
+	}
+
 }
 
 

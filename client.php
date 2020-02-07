@@ -119,7 +119,30 @@ while(1) {
     	//TODO: perform validation here!
     	$send_to = $x[0];
 
-    	if($send_to == $local_client_name || $connections[$send_to] === NULL){
+    	//if($send_to == "balance"){
+    	//	helper::check_balance($local_chain); 
+    	//	continue;
+    	//}
+
+    	if($send_to == "check"){
+    		echo PHP_EOL . "*********CHECK***********" . PHP_EOL; 
+    		//echo "Current Balance: "; 
+    		echo PHP_EOL;
+    		helper::check_balance($local_chain); 
+    		echo PHP_EOL . "Current Time Table: "; 
+    		helper::pretty_print_table($table);
+    		echo PHP_EOL . "Blockchian Info: " . PHP_EOL;
+    		if($local_chain){
+    			foreach ($local_chain as $index => $trx) {
+    				$rec_num = $index + 1;
+    				echo " >> Trx Record {$rec_num}: From {$trx['from']} To {$trx['to']} - Amount {$trx['amount']}. " . PHP_EOL; 
+    			}
+    		}
+    		echo PHP_EOL . "*************************" . PHP_EOL; 
+    		continue;
+    	}
+
+    	if($send_to == $local_client_name || @$connections[$send_to] === NULL){
     		echo "Invalid Client! " . PHP_EOL;
     		continue;
     	}
@@ -146,13 +169,26 @@ while(1) {
     		);
 
     		$json_string = json_encode($send_body);
+    		echo PHP_EOL . "[Msg Prepare]:" . $json_string;
     		socket_write($connections[$send_to], $json_string, strlen($json_string));
     		echo PHP_EOL . "[MESSAGE SENT TO $send_to]\n>>>Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
     	} else {	
+    		//Transaction goes here~ 
+
     		$amount = $x[1];
+
+    		$current_balance = helper::read_balance($local_chain, $local_client_name);
 
     		$local_time ++; 
     		$table[$local_2d_index][$local_2d_index] = $local_time;
+			echo "Update Local Time Table: "; 
+			helper::pretty_print_table($table);
+
+			if($amount > $current_balance){
+				echo PHP_EOL . "[INCORRECT AMOUNT] >>> Current Balance: $current_balance" . PHP_EOL . PHP_EOL;
+				continue;
+			}
+
     		//1. check locak amount!
 			$local_chain[] = array(
 				"from" => $local_client_name,
@@ -163,16 +199,13 @@ while(1) {
 				"original_time" => $local_time,
 			);
 
-			echo "Local Time Table: " . PHP_EOL; 
-			helper::pretty_print_table($table);
+			
 			echo PHP_EOL;
-			echo PHP_EOL . "[TRX SUCCESSED]. \n>>>Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
-			//print_r($local_chain);
+			echo PHP_EOL . "[TRX SUCCESSED] >>> Old Balance: $current_balance . Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
     	}
     } else {
         //loop through each socket and check if there is any message from others!
     	foreach($connections as $c_name => $sock){
-    		#echo "Before Socket Read ---  ";
     		$input = socket_read($sock, 1024);
     		$input = trim($input, "\n");
     		if($input){
@@ -186,15 +219,12 @@ while(1) {
 
     			echo "Client $c_name sent me a message: " . $msg . PHP_EOL;
 
-    			//3. process time table. 
-    			$received_time_table = $body["time_table"];
-
-    			//4. insert partial blockchian.
+    			//3. insert partial blockchian.
     			if($body['partial_block_chain']){
     				foreach ($body['partial_block_chain'] as $log) {
     					//check duplicate just in case. Some speical case that will cause client to push over duplicates.
     					$log_time = $log['original_time']; 
-    					//only insert then the time is larger than time table!
+    					//only insert entry with the time is larger than time table!
     					//echo ""; 
     					if($table[$local_2d_index][$log['original_client_2d_index']] < $log_time){
 							$local_chain[] = $log;    						
@@ -202,11 +232,20 @@ while(1) {
     				}
     			}
 
+    			//4. process time table. 
+    			$received_time_table = $body["time_table"];
+
     			helper::replicate_time_table($received_time_table, $body['original_client_2d_index'], $local_2d_index, $table);
 
-    			print_r($local_chain);
+    			//print_r($local_chain);
     			//helper::pretty_print_table($table);
-
+    			echo "Local Blockchian: " . PHP_EOL;
+    			if($local_chain){
+	    			foreach ($local_chain as $index => $trx) {
+	    				$rec_num = $index + 1;
+	    				echo " >> Trx Record {$rec_num}: From {$trx['from']} To {$trx['to']} - Amount {$trx['amount']}. " . PHP_EOL; 
+	    			}
+	    		}
 
     			echo PHP_EOL . ">>>Current Balance: " . helper::read_balance($local_chain, $local_client_name) . PHP_EOL . PHP_EOL;
 	    	}
